@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+  sftp-test:
+    build: .
+    ports:
+      - "2222:22"
+    volumes:
+      - ./overwrite:/overwrite
+      - ~/anyFolderToShare:/ssh-home/data
+    environment:
+      - OWNER=1002
+      - GROUP=1000
+      - USERNAME=user1
