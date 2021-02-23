@@ -11,20 +11,25 @@ case $USERNAME in
 esac
 
 # create users matching ids passed if necessary
-if [[ ${GROUP} -ne 65534 && ${GROUP} -ge 1000 ]]; then
-  if getent group ${GROUP} ; then delgroup $(getent group ${GROUP} | cut -d: -f1); fi
-  addgroup -g $GROUP $USERNAME
+if [[ ${GROUP} -gt 65534 || ${GROUP} -lt 1000 ]]; then
+  echo "invalid gid"
 fi
 
-if [[ ${OWNER} -ne 65534 && ${OWNER} -ge 1000 ]]; then
-  if getent passwd ${OWNER} ; then deluser $(getent passwd ${OWNER} | cut -d: -f1); fi
-  adduser -D -u $OWNER -s /sbin/nologin -G $USERNAME -h /ssh-home $USERNAME
-  
-  # set a password to unlock the account (as sshd does not allow login to locked accounts)
-  pw=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
-  echo "$USERNAME:$pw" | chpasswd
-  chown root:root /ssh-home
+if [[ ${OWNER} -gt 65534 || ${OWNER} -lt 1000 ]]; then
+  echo "invalid uid"
 fi
+
+
+if getent passwd ${OWNER} ; then deluser $(getent passwd ${OWNER} | cut -d: -f1); fi
+if getent group ${GROUP} ; then delgroup $(getent group ${GROUP} | cut -d: -f1); fi
+
+addgroup -g $GROUP $USERNAME
+adduser -D -u $OWNER -s /sbin/nologin -G $USERNAME -h /ssh-home $USERNAME
+  
+# set a password to unlock the account (as sshd does not allow login to locked accounts)
+pw=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
+echo "$USERNAME:$pw" | chpasswd
+chown root:root /ssh-home
 
 # create the data directory if necessary
 if [ ! -d /ssh-home/data ]; then
