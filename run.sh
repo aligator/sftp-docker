@@ -17,7 +17,7 @@ if [[ ${GROUP} -ne 65534 && ${GROUP} -ge 1000 ]]; then
 fi
 
 if [[ ${OWNER} -ne 65534 && ${OWNER} -ge 1000 ]]; then
-  if getent passwd ${OWNER} ; then deluser ${OWNER}; fi
+  if getent passwd ${OWNER} ; then deluser $(getent passwd ${OWNER} | cut -d: -f1); fi
   adduser -D -u $OWNER -s /sbin/nologin -G $USERNAME -h /ssh-home $USERNAME
   
   # set a password to unlock the account (as sshd does not allow login to locked accounts)
