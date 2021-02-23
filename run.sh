@@ -12,7 +12,7 @@ esac
 
 # create users matching ids passed if necessary
 if [[ ${GROUP} -ne 65534 && ${GROUP} -ge 1000 ]]; then
-  if getent group ${GROUP} ; then delgroup ${GROUP}; fi
+  if getent group ${GROUP} ; then delgroup $(getent group 1000 | cut -d: -f1); fi
   addgroup -g $GROUP $USERNAME
 fi
 
